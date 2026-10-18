@@ -1,0 +1,32 @@
+{% extends "sistema_practicas/base.html" %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block body %}
+<header>
+    <div>
+        <h1>Sistema de prácticas</h1>
+        <p class="lead">Inicia sesión para continuar.</p>
+    </div>
+</header>
+<main>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mensaje {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="panel login-box">
+        <form method="post">
+            {% csrf_token %}
+            <label for="correo">Correo</label>
+            <input id="correo" name="correo" type="email" required autocomplete="username">
+
+            <label for="password">Contraseña</label>
+            <input id="password" name="password" type="password" required autocomplete="current-password">
+
+            <button type="submit">Entrar</button>
+        </form>
+    </section>
+</main>
+{% endblock %}

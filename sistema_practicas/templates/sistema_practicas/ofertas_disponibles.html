@@ -1,0 +1,45 @@
+{% extends "sistema_practicas/base.html" %}
+
+{% block title %}Ofertas disponibles{% endblock %}
+
+{% block body %}
+<header>
+    <div>
+        <h1>Ofertas de prácticas</h1>
+        <p class="lead">Hola, {{ estudiante.nombre }}. Consulta las vacantes y postúlate.</p>
+    </div>
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="boton-secundario">Cerrar sesión</button>
+    </form>
+</header>
+<main>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mensaje {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if ofertas %}
+        {% for oferta in ofertas %}
+            <article class="oferta">
+                <h2>{{ oferta.titulo }}</h2>
+                <p class="meta"><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
+                <p class="meta"><strong>Tipo:</strong> {{ oferta.tipo }} · <strong>Vacantes:</strong> {{ oferta.vacantes }} · <strong>Publicada:</strong> {{ oferta.fecha_publicacion }}</p>
+                <p>{{ oferta.descripcion }}</p>
+                <p><strong>Requisitos:</strong> {{ oferta.requisitos }}</p>
+                {% if oferta.oferta_id in ofertas_postuladas %}
+                    <span class="estado">Ya postulaste</span>
+                {% else %}
+                    <form method="post" action="{% url 'postularse' oferta.oferta_id %}">
+                        {% csrf_token %}
+                        <button type="submit">Postularme</button>
+                    </form>
+                {% endif %}
+            </article>
+        {% endfor %}
+    {% else %}
+        <p class="vacio">No hay ofertas disponibles por ahora.</p>
+    {% endif %}
+</main>
+{% endblock %}
