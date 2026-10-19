@@ -78,13 +78,20 @@ class Estudiante(PasswordMixin, models.Model):
 
 
 class Oferta(models.Model):
+    class TipoOferta(models.TextChoices):
+        PRACTICAS = 'Prácticas', 'Prácticas'
+        SERVICIO_SOCIAL = 'Servicio Social', 'Servicio Social'
+
     oferta_id = models.AutoField(primary_key=True, db_column='Oferta_ID')
     titulo = models.CharField(max_length=100)
     descripcion = models.TextField()
     requisitos = models.TextField()
     vacantes = models.IntegerField()
     fecha_publicacion = models.DateField()
-    tipo = models.CharField(max_length=30)
+    tipo = models.CharField(
+        max_length=30,
+        choices=TipoOferta.choices,
+    )
     administrador = models.ForeignKey(
         Administrador,
         on_delete=models.CASCADE,
@@ -108,9 +115,18 @@ class Oferta(models.Model):
 
 
 class Postulacion(models.Model):
+    class EstadoPostulacion(models.TextChoices):
+        PENDIENTE = 'Pendiente', 'Pendiente'
+        ACEPTADO = 'Aceptado', 'Aceptado'
+        RECHAZADO = 'Rechazado', 'Rechazado'
+
     postulacion_id = models.AutoField(primary_key=True, db_column='Postulacion_ID')
     fecha_postulacion = models.DateField()
-    estado = models.CharField(max_length=30)
+    estado = models.CharField(
+        max_length=30,
+        choices=EstadoPostulacion.choices,
+        default=EstadoPostulacion.PENDIENTE,
+    )
     estudiante = models.ForeignKey(
         Estudiante,
         on_delete=models.CASCADE,
