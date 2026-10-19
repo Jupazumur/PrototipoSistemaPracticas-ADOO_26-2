@@ -25,7 +25,7 @@
             background: var(--bg);
             color: var(--text);
         }
-        header, main { max-width: 960px; margin: 0 auto; padding: 1.25rem; }
+        header, main { max-width: 1100px; margin: 0 auto; padding: 1.25rem; }
         header {
             display: flex;
             justify-content: space-between;
@@ -43,11 +43,55 @@
             margin-top: 1rem;
         }
         label { display: block; font-size: 0.9rem; margin-bottom: 0.3rem; }
-        input[type="email"], input[type="password"], input[type="text"] {
+        input[type="email"], input[type="password"], input[type="text"],
+        input[type="date"], select {
             width: 100%;
             max-width: 360px;
             padding: 0.5rem 0.55rem;
             margin-bottom: 0.85rem;
+        }
+        .filtros {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem 1rem;
+            align-items: end;
+        }
+        .filtros .campo { min-width: 0; }
+        .filtros input, .filtros select { max-width: none; margin-bottom: 0; }
+        .acciones-filtro {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.85rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.45rem 0.4rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        th { color: var(--muted); font-weight: 600; }
+        details.oferta summary {
+            cursor: pointer;
+            list-style: none;
+        }
+        details.oferta summary::-webkit-details-marker { display: none; }
+        .resumen-oferta {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .contador {
+            white-space: nowrap;
+            color: var(--accent);
+            font-weight: bold;
         }
         button, .boton-secundario {
             background: var(--accent);

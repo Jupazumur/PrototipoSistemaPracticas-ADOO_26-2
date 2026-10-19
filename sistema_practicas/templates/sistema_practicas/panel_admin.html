@@ -1,0 +1,120 @@
+{% extends "sistema_practicas/base.html" %}
+
+{% block title %}Panel de administrador{% endblock %}
+
+{% block body %}
+<header>
+    <div>
+        <h1>Panel de administrador</h1>
+        <p class="lead">Hola, {{ administrador.nombre }}. Consulta las ofertas y quién se ha postulado.</p>
+    </div>
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="boton-secundario">Cerrar sesión</button>
+    </form>
+</header>
+<main>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mensaje {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="panel">
+        <form method="get">
+            <div class="filtros">
+                <div class="campo">
+                    <label for="q">Buscar</label>
+                    <input id="q" name="q" type="text" value="{{ filtros.q }}" placeholder="Título, empresa o descripción">
+                </div>
+                <div class="campo">
+                    <label for="empresa">Empresa</label>
+                    <select id="empresa" name="empresa">
+                        <option value="">Todas</option>
+                        {% for empresa in empresas %}
+                            <option value="{{ empresa.empresa_id }}" {% if filtros.empresa == empresa.empresa_id|stringformat:"s" %}selected{% endif %}>{{ empresa.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" name="tipo">
+                        <option value="">Todos</option>
+                        {% for tipo in tipos %}
+                            <option value="{{ tipo }}" {% if filtros.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="estado">Estado de postulación</label>
+                    <select id="estado" name="estado">
+                        <option value="">Todos</option>
+                        {% for estado in estados %}
+                            <option value="{{ estado }}" {% if filtros.estado == estado %}selected{% endif %}>{{ estado }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="fecha_desde">Publicada desde</label>
+                    <input id="fecha_desde" name="fecha_desde" type="date" value="{{ filtros.fecha_desde }}">
+                </div>
+                <div class="campo">
+                    <label for="fecha_hasta">Publicada hasta</label>
+                    <input id="fecha_hasta" name="fecha_hasta" type="date" value="{{ filtros.fecha_hasta }}">
+                </div>
+            </div>
+            <div class="acciones-filtro">
+                <button type="submit">Filtrar</button>
+                <a class="boton-secundario" href="{% url 'panel_admin' %}">Limpiar</a>
+            </div>
+        </form>
+    </section>
+
+    {% if ofertas %}
+        {% for oferta in ofertas %}
+            <details class="oferta" {% if forloop.first %}open{% endif %}>
+                <summary>
+                    <div class="resumen-oferta">
+                        <div>
+                            <h2>{{ oferta.titulo }}</h2>
+                            <p class="meta"><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
+                            <p class="meta"><strong>Tipo:</strong> {{ oferta.tipo }} · <strong>Vacantes:</strong> {{ oferta.vacantes }} · <strong>Publicada:</strong> {{ oferta.fecha_publicacion }}</p>
+                        </div>
+                        <span class="contador">{{ oferta.num_postulaciones }} postulante{{ oferta.num_postulaciones|pluralize:"s" }}</span>
+                    </div>
+                </summary>
+                <p>{{ oferta.descripcion }}</p>
+                <p><strong>Requisitos:</strong> {{ oferta.requisitos }}</p>
+                {% if oferta.postulaciones.all %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Correo</th>
+                                <th>Carrera</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for postulacion in oferta.postulaciones.all %}
+                                <tr>
+                                    <td>{{ postulacion.estudiante.nombre }}</td>
+                                    <td>{{ postulacion.estudiante.correo }}</td>
+                                    <td>{{ postulacion.estudiante.carrera }}</td>
+                                    <td>{{ postulacion.fecha_postulacion }}</td>
+                                    <td>{{ postulacion.estado }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="meta">Nadie se ha postulado a esta oferta todavía.</p>
+                {% endif %}
+            </details>
+        {% endfor %}
+    {% else %}
+        <p class="vacio">No hay ofertas que coincidan con los filtros seleccionados.</p>
+    {% endif %}
+</main>
+{% endblock %}

@@ -1,11 +1,14 @@
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login as auth_login, logout as auth_logout
 from django.db import IntegrityError
+from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 
-from .models import Administrador, Estudiante, Oferta, Postulacion
+from .models import Administrador, Empresa, Estudiante, Oferta, Postulacion
 
 User = get_user_model()
 
@@ -15,6 +18,17 @@ def _estudiante_sesion(request):
     if not estudiante_id:
         return None
     return Estudiante.objects.filter(pk=estudiante_id).first()
+
+
+def _administrador_sesion(request):
+    administrador_id = request.session.get('administrador_id')
+    if administrador_id:
+        administrador = Administrador.objects.filter(pk=administrador_id).first()
+        if administrador:
+            return administrador
+    if request.user.is_authenticated and request.user.is_staff:
+        return Administrador.objects.filter(correo__iexact=request.user.username).first()
+    return None
 
 
 def _usuario_admin_django(administrador, raw_password):
@@ -34,11 +48,18 @@ def _usuario_admin_django(administrador, raw_password):
     return user
 
 
+def _parse_fecha(valor):
+    try:
+        return datetime.strptime(valor, '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        return None
+
+
 def _redirigir_si_sesion(request):
     if _estudiante_sesion(request):
         return redirect('ofertas_disponibles')
-    if request.user.is_authenticated and request.user.is_staff:
-        return redirect('admin:index')
+    if _administrador_sesion(request):
+        return redirect('panel_admin')
     return None
 
 
@@ -57,7 +78,8 @@ def login_view(request):
             user = _usuario_admin_django(administrador, password)
             auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             request.session.pop('estudiante_id', None)
-            return redirect('admin:index')
+            request.session['administrador_id'] = administrador.administrador_id
+            return redirect('panel_admin')
 
         estudiante = Estudiante.objects.filter(correo__iexact=correo).first()
         if estudiante and estudiante.check_password(password):
@@ -77,8 +99,8 @@ def logout_view(request):
 
 
 def ofertas_disponibles(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        return redirect('admin:index')
+    if _administrador_sesion(request):
+        return redirect('panel_admin')
 
     estudiante = _estudiante_sesion(request)
     if not estudiante:
@@ -131,3 +153,81 @@ def postularse(request, oferta_id):
         messages.success(request, f'Te postulaste a "{oferta.titulo}".')
 
     return redirect('ofertas_disponibles')
+
+
+def panel_admin(request):
+    if _estudiante_sesion(request) and not _administrador_sesion(request):
+        return redirect('ofertas_disponibles')
+
+    administrador = _administrador_sesion(request)
+    if not administrador:
+        messages.error(request, 'Inicia sesión como administrador para ver el panel.')
+        return redirect('login')
+
+    empresas = Empresa.objects.order_by('nombre')
+    tipos = (
+        Oferta.objects.exclude(tipo='')
+        .order_by('tipo')
+        .values_list('tipo', flat=True)
+        .distinct()
+    )
+    estados = (
+        Postulacion.objects.exclude(estado='')
+        .order_by('estado')
+        .values_list('estado', flat=True)
+        .distinct()
+    )
+
+    filtros = {
+        'empresa': request.GET.get('empresa', '').strip(),
+        'tipo': request.GET.get('tipo', '').strip(),
+        'estado': request.GET.get('estado', '').strip(),
+        'fecha_desde': request.GET.get('fecha_desde', '').strip(),
+        'fecha_hasta': request.GET.get('fecha_hasta', '').strip(),
+        'q': request.GET.get('q', '').strip(),
+    }
+
+    postulaciones_qs = Postulacion.objects.select_related('estudiante').order_by(
+        '-fecha_postulacion', 'estudiante__nombre'
+    )
+    if filtros['estado']:
+        postulaciones_qs = postulaciones_qs.filter(estado=filtros['estado'])
+
+    ofertas = (
+        Oferta.objects.select_related('empresa')
+        .annotate(num_postulaciones=Count('postulaciones', distinct=True))
+        .prefetch_related(Prefetch('postulaciones', queryset=postulaciones_qs))
+        .order_by('-fecha_publicacion', 'titulo')
+    )
+
+    if filtros['empresa']:
+        ofertas = ofertas.filter(empresa_id=filtros['empresa'])
+    if filtros['tipo']:
+        ofertas = ofertas.filter(tipo=filtros['tipo'])
+    if filtros['estado']:
+        ofertas = ofertas.filter(postulaciones__estado=filtros['estado']).distinct()
+    fecha_desde = _parse_fecha(filtros['fecha_desde'])
+    fecha_hasta = _parse_fecha(filtros['fecha_hasta'])
+    if fecha_desde:
+        ofertas = ofertas.filter(fecha_publicacion__gte=fecha_desde)
+    if fecha_hasta:
+        ofertas = ofertas.filter(fecha_publicacion__lte=fecha_hasta)
+    if filtros['q']:
+        ofertas = ofertas.filter(
+            Q(titulo__icontains=filtros['q'])
+            | Q(descripcion__icontains=filtros['q'])
+            | Q(empresa__nombre__icontains=filtros['q'])
+        )
+
+    return render(
+        request,
+        'sistema_practicas/panel_admin.html',
+        {
+            'administrador': administrador,
+            'ofertas': ofertas,
+            'empresas': empresas,
+            'tipos': tipos,
+            'estados': estados,
+            'filtros': filtros,
+        },
+    )
