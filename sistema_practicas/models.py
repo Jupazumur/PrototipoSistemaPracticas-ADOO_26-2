@@ -55,12 +55,31 @@ class Empresa(models.Model):
         return self.nombre
 
 
+class Carrera(models.Model):
+    carrera_id = models.AutoField(primary_key=True, db_column='Carrera_ID')
+    nombre = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        db_table = 'Carrera'
+        verbose_name = 'Carrera'
+        verbose_name_plural = 'Carreras'
+
+    def __str__(self):
+        return self.nombre
+
+
 class Estudiante(PasswordMixin, models.Model):
     estudiante_id = models.AutoField(primary_key=True, db_column='Estudiante_ID')
     nombre = models.CharField(max_length=100)
     correo = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=128)
-    carrera = models.CharField(max_length=50)
+    carrera = models.ForeignKey(
+        Carrera,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='estudiantes',
+    )
     administrador = models.ForeignKey(
         Administrador,
         on_delete=models.CASCADE,
@@ -91,6 +110,11 @@ class Oferta(models.Model):
     tipo = models.CharField(
         max_length=30,
         choices=TipoOferta.choices,
+    )
+    carreras = models.ManyToManyField(
+        Carrera,
+        related_name='ofertas',
+        blank=True,
     )
     administrador = models.ForeignKey(
         Administrador,

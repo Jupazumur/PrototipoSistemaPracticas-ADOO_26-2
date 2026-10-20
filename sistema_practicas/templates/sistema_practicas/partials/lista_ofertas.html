@@ -3,7 +3,16 @@
     {% for oferta in ofertas %}
         <article class="card bg-white shadow-sm border border-base-200 hover:shadow-md transition-shadow">
             <div class="card-body p-6">
-                <h2 class="card-title text-xl text-institucional-blue mb-1">{{ oferta.titulo }}</h2>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-2">
+                    <h2 class="card-title text-xl text-institucional-blue">{{ oferta.titulo }}</h2>
+                    <div class="flex flex-wrap gap-1">
+                        {% for carrera in oferta.carreras.all %}
+                            <span class="badge badge-outline border-institucional-blue text-institucional-blue text-xs font-semibold">{{ carrera.nombre }}</span>
+                        {% empty %}
+                            <span class="badge badge-ghost text-xs">Todas las carreras</span>
+                        {% endfor %}
+                    </div>
+                </div>
                 
                 <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mb-4 border-b border-base-200 pb-3">
                     <p><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
@@ -19,7 +28,7 @@
                 
                 <div class="card-actions justify-end mt-4 pt-2">
                 {% if oferta.oferta_id in ofertas_postuladas %}
-                    <div class="badge badge-success text-white p-3 font-semibold">Ya postulaste</div>
+                    <div class="badge badge-success text-white p-3 font-semibold">Ya te postulaste</div>
                 {% else %}
                     <form method="post" 
                           action="{% url 'postularse' oferta.oferta_id %}"

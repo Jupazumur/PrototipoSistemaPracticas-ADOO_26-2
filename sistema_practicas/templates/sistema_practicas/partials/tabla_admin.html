@@ -5,7 +5,14 @@
             <summary class="p-5 cursor-pointer hover:bg-base-50 transition-colors list-none">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2 class="text-lg font-bold text-institucional-blue mb-1 group-open:text-institucional-orange transition-colors">{{ oferta.titulo }}</h2>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <h2 class="text-lg font-bold text-institucional-blue group-open:text-institucional-orange transition-colors">{{ oferta.titulo }}</h2>
+                            {% for carrera in oferta.carreras.all %}
+                                <span class="badge badge-outline border-institucional-blue text-institucional-blue text-xs">{{ carrera.nombre }}</span>
+                            {% empty %}
+                                <span class="badge badge-ghost text-xs">Sin restricción</span>
+                            {% endfor %}
+                        </div>
                         <div class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
                             <p><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
                             <p><strong>Tipo:</strong> {{ oferta.tipo }}</p>
@@ -43,7 +50,7 @@
                                         <td class="font-medium">{{ postulacion.estudiante.nombre }}</td>
                                         <td>{{ postulacion.estudiante.correo }}</td>
                                         <td>
-                                            <span class="badge badge-ghost badge-sm">{{ postulacion.estudiante.carrera }}</span>
+                                            <span class="badge badge-ghost badge-sm">{{ postulacion.estudiante.carrera.nombre }}</span>
                                         </td>
                                         <td class="text-sm text-gray-500">{{ postulacion.fecha_postulacion }}</td>
                                         <td>

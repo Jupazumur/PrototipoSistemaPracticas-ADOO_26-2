@@ -110,6 +110,7 @@ def ofertas_disponibles(request):
     ofertas = (
         Oferta.objects.filter(vacantes__gt=0)
         .select_related('empresa')
+        .prefetch_related('carreras')
         .order_by('-fecha_publicacion', 'titulo')
     )
     ofertas_postuladas = set(
@@ -152,12 +153,13 @@ def postularse(request, oferta_id):
     except IntegrityError:
         messages.warning(request, 'Ya te postulaste a esta oferta.')
     else:
-        messages.success(request, f'Te postulaste a "{oferta.titulo}".')
+        messages.success(request, f'Te postulaste a "{oferta.titulo}".')    # ... (código previo) ...
 
     if request.headers.get('HX-Request'):
         ofertas = (
             Oferta.objects.filter(vacantes__gt=0)
             .select_related('empresa')
+            .prefetch_related('carreras')
             .order_by('-fecha_publicacion', 'titulo')
         )
         ofertas_postuladas = set(
@@ -210,7 +212,7 @@ def panel_admin(request):
         'q': request.GET.get('q', '').strip(),
     }
 
-    postulaciones_qs = Postulacion.objects.select_related('estudiante').order_by(
+    postulaciones_qs = Postulacion.objects.select_related('estudiante__carrera').order_by(
         '-fecha_postulacion', 'estudiante__nombre'
     )
     if filtros['estado']:
@@ -219,7 +221,7 @@ def panel_admin(request):
     ofertas = (
         Oferta.objects.select_related('empresa')
         .annotate(num_postulaciones=Count('postulaciones', distinct=True))
-        .prefetch_related(Prefetch('postulaciones', queryset=postulaciones_qs))
+        .prefetch_related('carreras', Prefetch('postulaciones', queryset=postulaciones_qs))
         .order_by('-fecha_publicacion', 'titulo')
     )
 

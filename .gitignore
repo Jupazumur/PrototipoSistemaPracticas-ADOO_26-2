@@ -222,3 +222,4 @@ __marimo__/
 # Extra
 .idea
 db.sqlite3
+data_import.sql
