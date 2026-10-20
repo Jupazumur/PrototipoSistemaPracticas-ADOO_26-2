@@ -117,15 +117,17 @@ def ofertas_disponibles(request):
             'oferta_id', flat=True
         )
     )
-    return render(
-        request,
-        'sistema_practicas/ofertas_disponibles.html',
-        {
-            'estudiante': estudiante,
-            'ofertas': ofertas,
-            'ofertas_postuladas': ofertas_postuladas,
-        },
-    )
+
+    context = {
+        'estudiante': estudiante,
+        'ofertas': ofertas,
+        'ofertas_postuladas': ofertas_postuladas,
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'sistema_practicas/partials/lista_ofertas.html', context)
+
+    return render(request, 'sistema_practicas/ofertas_disponibles.html', context)
 
 
 @require_POST
@@ -151,6 +153,27 @@ def postularse(request, oferta_id):
         messages.warning(request, 'Ya te postulaste a esta oferta.')
     else:
         messages.success(request, f'Te postulaste a "{oferta.titulo}".')
+
+    if request.headers.get('HX-Request'):
+        ofertas = (
+            Oferta.objects.filter(vacantes__gt=0)
+            .select_related('empresa')
+            .order_by('-fecha_publicacion', 'titulo')
+        )
+        ofertas_postuladas = set(
+            Postulacion.objects.filter(estudiante=estudiante).values_list(
+                'oferta_id', flat=True
+            )
+        )
+        return render(
+            request,
+            'sistema_practicas/partials/lista_ofertas.html',
+            {
+                'estudiante': estudiante,
+                'ofertas': ofertas,
+                'ofertas_postuladas': ofertas_postuladas,
+            },
+        )
 
     return redirect('ofertas_disponibles')
 
@@ -219,15 +242,16 @@ def panel_admin(request):
             | Q(empresa__nombre__icontains=filtros['q'])
         )
 
-    return render(
-        request,
-        'sistema_practicas/panel_admin.html',
-        {
-            'administrador': administrador,
-            'ofertas': ofertas,
-            'empresas': empresas,
-            'tipos': tipos,
-            'estados': estados,
-            'filtros': filtros,
-        },
-    )
+    context = {
+        'administrador': administrador,
+        'ofertas': ofertas,
+        'empresas': empresas,
+        'tipos': tipos,
+        'estados': estados,
+        'filtros': filtros,
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'sistema_practicas/partials/tabla_admin.html', context)
+
+    return render(request, 'sistema_practicas/panel_admin.html', context)

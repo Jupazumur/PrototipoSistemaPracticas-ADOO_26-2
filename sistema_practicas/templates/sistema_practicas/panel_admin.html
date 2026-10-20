@@ -21,7 +21,12 @@
     {% endif %}
 
     <section class="panel">
-        <form method="get">
+            <form method="get" 
+                action="{% url 'panel_admin' %}"
+                hx-get="{% url 'panel_admin' %}" 
+                hx-target="#tabla-container" 
+                hx-swap="innerHTML"
+                hx-trigger="submit, change from:select, change from:input[type='date'], keyup changed delay:400ms from:#q">
             <div class="filtros">
                 <div class="campo">
                     <label for="q">Buscar</label>
@@ -70,51 +75,8 @@
         </form>
     </section>
 
-    {% if ofertas %}
-        {% for oferta in ofertas %}
-            <details class="oferta" {% if forloop.first %}open{% endif %}>
-                <summary>
-                    <div class="resumen-oferta">
-                        <div>
-                            <h2>{{ oferta.titulo }}</h2>
-                            <p class="meta"><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
-                            <p class="meta"><strong>Tipo:</strong> {{ oferta.tipo }} · <strong>Vacantes:</strong> {{ oferta.vacantes }} · <strong>Publicada:</strong> {{ oferta.fecha_publicacion }}</p>
-                        </div>
-                        <span class="contador">{{ oferta.num_postulaciones }} postulante{{ oferta.num_postulaciones|pluralize:"s" }}</span>
-                    </div>
-                </summary>
-                <p>{{ oferta.descripcion }}</p>
-                <p><strong>Requisitos:</strong> {{ oferta.requisitos }}</p>
-                {% if oferta.postulaciones.all %}
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Estudiante</th>
-                                <th>Correo</th>
-                                <th>Carrera</th>
-                                <th>Fecha</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for postulacion in oferta.postulaciones.all %}
-                                <tr>
-                                    <td>{{ postulacion.estudiante.nombre }}</td>
-                                    <td>{{ postulacion.estudiante.correo }}</td>
-                                    <td>{{ postulacion.estudiante.carrera }}</td>
-                                    <td>{{ postulacion.fecha_postulacion }}</td>
-                                    <td>{{ postulacion.estado }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p class="meta">Nadie se ha postulado a esta oferta todavía.</p>
-                {% endif %}
-            </details>
-        {% endfor %}
-    {% else %}
-        <p class="vacio">No hay ofertas que coincidan con los filtros seleccionados.</p>
-    {% endif %}
+    <div id="tabla-container">
+        {% include "sistema_practicas/partials/tabla_admin.html" %}
+    </div>
 </main>
 {% endblock %}

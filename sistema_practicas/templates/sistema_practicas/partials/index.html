@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Practices List</h2>
+
+<button 
+    hx-get="{% url 'item_list' %}" 
+    hx-target="#list-container" 
+    hx-swap="innerHTML">
+    Load Items
+</button>
+
+<div id="list-container">
+    <!-- Partial template will load here dynamically -->
+</div>
+{% endblock %}
