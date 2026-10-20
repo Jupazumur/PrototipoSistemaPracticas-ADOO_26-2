@@ -3,24 +3,29 @@
 {% block title %}Ofertas disponibles{% endblock %}
 
 {% block body %}
-<header>
+<header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border border-base-200">
     <div>
-        <h1>Ofertas de prácticas</h1>
-        <p class="lead">Hola, {{ estudiante.nombre }}. Consulta las vacantes y postúlate.</p>
+        <h1 class="text-2xl font-bold text-institucional-blue">Ofertas de prácticas</h1>
+        <p class="text-gray-500 mt-1">Hola, <span class="font-semibold text-gray-700">{{ estudiante.nombre }}</span>. Consulta las vacantes y postúlate.</p>
     </div>
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" class="boton-secundario">Cerrar sesión</button>
+        <button type="submit" class="btn btn-outline text-institucional-blue hover:bg-institucional-blue hover:border-institucional-blue">Cerrar sesión</button>
     </form>
 </header>
+
 <main>
     {% if messages %}
+        <div class="space-y-2 mb-6">
         {% for message in messages %}
-            <div class="mensaje {{ message.tags }}">{{ message }}</div>
+            <div role="alert" class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-warning{% endif %} shadow-sm">
+                <span>{{ message }}</span>
+            </div>
         {% endfor %}
+        </div>
     {% endif %}
 
-    <div id="lista-ofertas-container">
+    <div id="lista-ofertas-container" class="space-y-4">
         {% include "sistema_practicas/partials/lista_ofertas.html" %}
     </div>
 </main>

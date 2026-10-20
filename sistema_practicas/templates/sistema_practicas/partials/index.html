@@ -1,16 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Practices List</h2>
+<div class="p-6 max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold text-institucional-blue mb-4">Practices List</h2>
 
-<button 
-    hx-get="{% url 'item_list' %}" 
-    hx-target="#list-container" 
-    hx-swap="innerHTML">
-    Load Items
-</button>
+    <button 
+        hx-get="{% url 'item_list' %}" 
+        hx-target="#list-container" 
+        hx-swap="innerHTML"
+        class="btn bg-institucional-orange hover:bg-orange-500 text-white border-none mb-6">
+        Load Items
+    </button>
 
-<div id="list-container">
-    <!-- Partial template will load here dynamically -->
+    <div id="list-container">
+        <!-- Partial template will load here dynamically -->
+    </div>
 </div>
 {% endblock %}

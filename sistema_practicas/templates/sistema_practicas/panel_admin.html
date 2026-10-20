@@ -3,79 +3,93 @@
 {% block title %}Panel de administrador{% endblock %}
 
 {% block body %}
-<header>
+<header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border border-base-200">
     <div>
-        <h1>Panel de administrador</h1>
-        <p class="lead">Hola, {{ administrador.nombre }}. Consulta las ofertas y quién se ha postulado.</p>
+        <h1 class="text-2xl font-bold text-institucional-blue">Panel de administrador</h1>
+        <p class="text-gray-500 mt-1">Hola, <span class="font-semibold text-gray-700">{{ administrador.nombre }}</span>. Consulta las ofertas y quién se ha postulado.</p>
     </div>
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" class="boton-secundario">Cerrar sesión</button>
+        <button type="submit" class="btn btn-outline text-institucional-blue hover:bg-institucional-blue hover:border-institucional-blue">Cerrar sesión</button>
     </form>
 </header>
+
 <main>
     {% if messages %}
+        <div class="space-y-2 mb-6">
         {% for message in messages %}
-            <div class="mensaje {{ message.tags }}">{{ message }}</div>
+            <div role="alert" class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-warning{% endif %} shadow-sm">
+                <span>{{ message }}</span>
+            </div>
         {% endfor %}
+        </div>
     {% endif %}
 
-    <section class="panel">
+    <section class="card bg-white shadow-sm border border-base-200 mb-8">
+        <div class="card-body p-6">
             <form method="get" 
                 action="{% url 'panel_admin' %}"
                 hx-get="{% url 'panel_admin' %}" 
                 hx-target="#tabla-container" 
                 hx-swap="innerHTML"
                 hx-trigger="submit, change from:select, change from:input[type='date'], keyup changed delay:400ms from:#q">
-            <div class="filtros">
-                <div class="campo">
-                    <label for="q">Buscar</label>
-                    <input id="q" name="q" type="text" value="{{ filtros.q }}" placeholder="Título, empresa o descripción">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="form-control">
+                        <label for="q" class="label"><span class="label-text">Buscar</span></label>
+                        <input id="q" name="q" type="text" value="{{ filtros.q }}" placeholder="Título, empresa o descripción" class="input input-bordered w-full input-sm">
+                    </div>
+                    
+                    <div class="form-control">
+                        <label for="empresa" class="label"><span class="label-text">Empresa</span></label>
+                        <select id="empresa" name="empresa" class="select select-bordered w-full select-sm">
+                            <option value="">Todas</option>
+                            {% for empresa in empresas %}
+                                <option value="{{ empresa.empresa_id }}" {% if filtros.empresa == empresa.empresa_id|stringformat:"s" %}selected{% endif %}>{{ empresa.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label for="tipo" class="label"><span class="label-text">Tipo</span></label>
+                        <select id="tipo" name="tipo" class="select select-bordered w-full select-sm">
+                            <option value="">Todos</option>
+                            {% for tipo in tipos %}
+                                <option value="{{ tipo }}" {% if filtros.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label for="estado" class="label"><span class="label-text">Estado de postulación</span></label>
+                        <select id="estado" name="estado" class="select select-bordered w-full select-sm">
+                            <option value="">Todos</option>
+                            {% for estado in estados %}
+                                <option value="{{ estado }}" {% if filtros.estado == estado %}selected{% endif %}>{{ estado }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label for="fecha_desde" class="label"><span class="label-text">Publicada desde</span></label>
+                        <input id="fecha_desde" name="fecha_desde" type="date" value="{{ filtros.fecha_desde }}" class="input input-bordered w-full input-sm">
+                    </div>
+                    
+                    <div class="form-control">
+                        <label for="fecha_hasta" class="label"><span class="label-text">Publicada hasta</span></label>
+                        <input id="fecha_hasta" name="fecha_hasta" type="date" value="{{ filtros.fecha_hasta }}" class="input input-bordered w-full input-sm">
+                    </div>
                 </div>
-                <div class="campo">
-                    <label for="empresa">Empresa</label>
-                    <select id="empresa" name="empresa">
-                        <option value="">Todas</option>
-                        {% for empresa in empresas %}
-                            <option value="{{ empresa.empresa_id }}" {% if filtros.empresa == empresa.empresa_id|stringformat:"s" %}selected{% endif %}>{{ empresa.nombre }}</option>
-                        {% endfor %}
-                    </select>
+                
+                <div class="flex items-center gap-3 mt-6 pt-4 border-t border-base-200">
+                    <button type="submit" class="btn bg-institucional-blue hover:bg-blue-800 text-white btn-sm px-6">Filtrar</button>
+                    <a href="{% url 'panel_admin' %}" class="btn btn-ghost btn-sm">Limpiar</a>
                 </div>
-                <div class="campo">
-                    <label for="tipo">Tipo</label>
-                    <select id="tipo" name="tipo">
-                        <option value="">Todos</option>
-                        {% for tipo in tipos %}
-                            <option value="{{ tipo }}" {% if filtros.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="campo">
-                    <label for="estado">Estado de postulación</label>
-                    <select id="estado" name="estado">
-                        <option value="">Todos</option>
-                        {% for estado in estados %}
-                            <option value="{{ estado }}" {% if filtros.estado == estado %}selected{% endif %}>{{ estado }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="campo">
-                    <label for="fecha_desde">Publicada desde</label>
-                    <input id="fecha_desde" name="fecha_desde" type="date" value="{{ filtros.fecha_desde }}">
-                </div>
-                <div class="campo">
-                    <label for="fecha_hasta">Publicada hasta</label>
-                    <input id="fecha_hasta" name="fecha_hasta" type="date" value="{{ filtros.fecha_hasta }}">
-                </div>
-            </div>
-            <div class="acciones-filtro">
-                <button type="submit">Filtrar</button>
-                <a class="boton-secundario" href="{% url 'panel_admin' %}">Limpiar</a>
-            </div>
-        </form>
+            </form>
+        </div>
     </section>
 
-    <div id="tabla-container">
+    <div id="tabla-container" class="bg-white rounded-xl shadow-sm border border-base-200 overflow-hidden">
         {% include "sistema_practicas/partials/tabla_admin.html" %}
     </div>
 </main>

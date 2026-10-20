@@ -1,46 +1,72 @@
 {% if ofertas %}
+    <div class="space-y-4">
     {% for oferta in ofertas %}
-        <details class="oferta" {% if forloop.first %}open{% endif %}>
-            <summary>
-                <div class="resumen-oferta">
+        <details class="group bg-white rounded-xl shadow-sm border border-base-200 overflow-hidden" {% if forloop.first %}open{% endif %}>
+            <summary class="p-5 cursor-pointer hover:bg-base-50 transition-colors list-none">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2>{{ oferta.titulo }}</h2>
-                        <p class="meta"><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
-                        <p class="meta"><strong>Tipo:</strong> {{ oferta.tipo }} · <strong>Vacantes:</strong> {{ oferta.vacantes }} · <strong>Publicada:</strong> {{ oferta.fecha_publicacion }}</p>
+                        <h2 class="text-lg font-bold text-institucional-blue mb-1 group-open:text-institucional-orange transition-colors">{{ oferta.titulo }}</h2>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                            <p><strong>Empresa:</strong> {{ oferta.empresa.nombre }}</p>
+                            <p><strong>Tipo:</strong> {{ oferta.tipo }}</p>
+                            <p><strong>Vacantes:</strong> {{ oferta.vacantes }}</p>
+                            <p><strong>Publicada:</strong> {{ oferta.fecha_publicacion }}</p>
+                        </div>
                     </div>
-                    <span class="contador">{{ oferta.num_postulaciones }} postulante{{ oferta.num_postulaciones|pluralize:"s" }}</span>
+                    <div class="badge bg-institucional-blue text-white border-none font-semibold whitespace-nowrap p-3">
+                        {{ oferta.num_postulaciones }} postulante{{ oferta.num_postulaciones|pluralize:"s" }}
+                    </div>
                 </div>
             </summary>
-            <p>{{ oferta.descripcion }}</p>
-            <p><strong>Requisitos:</strong> {{ oferta.requisitos }}</p>
-            {% if oferta.postulaciones.all %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Estudiante</th>
-                            <th>Correo</th>
-                            <th>Carrera</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for postulacion in oferta.postulaciones.all %}
-                            <tr>
-                                <td>{{ postulacion.estudiante.nombre }}</td>
-                                <td>{{ postulacion.estudiante.correo }}</td>
-                                <td>{{ postulacion.estudiante.carrera }}</td>
-                                <td>{{ postulacion.fecha_postulacion }}</td>
-                                <td>{{ postulacion.estado }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p class="meta">Nadie se ha postulado a esta oferta todavía.</p>
-            {% endif %}
+            
+            <div class="p-5 border-t border-base-200 bg-base-50/30">
+                <div class="space-y-2 text-gray-700 mb-6">
+                    <p>{{ oferta.descripcion }}</p>
+                    <p><strong class="text-gray-900">Requisitos:</strong> {{ oferta.requisitos }}</p>
+                </div>
+                
+                {% if oferta.postulaciones.all %}
+                    <div class="overflow-x-auto bg-white rounded-lg border border-base-200">
+                        <table class="table table-zebra w-full">
+                            <thead class="bg-base-200 text-gray-700">
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Correo</th>
+                                    <th>Carrera</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for postulacion in oferta.postulaciones.all %}
+                                    <tr>
+                                        <td class="font-medium">{{ postulacion.estudiante.nombre }}</td>
+                                        <td>{{ postulacion.estudiante.correo }}</td>
+                                        <td>
+                                            <span class="badge badge-ghost badge-sm">{{ postulacion.estudiante.carrera }}</span>
+                                        </td>
+                                        <td class="text-sm text-gray-500">{{ postulacion.fecha_postulacion }}</td>
+                                        <td>
+                                            <span class="badge badge-sm {% if postulacion.estado == 'Aceptado' %}badge-success text-white{% elif postulacion.estado == 'Rechazado' %}badge-error text-white{% else %}badge-warning{% endif %}">
+                                                {{ postulacion.estado }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-sm text-gray-500 italic bg-white p-4 rounded-lg border border-dashed border-base-300">
+                        Nadie se ha postulado a esta oferta todavía.
+                    </div>
+                {% endif %}
+            </div>
         </details>
     {% endfor %}
+    </div>
 {% else %}
-    <p class="vacio">No hay ofertas que coincidan con los filtros seleccionados.</p>
+    <div role="alert" class="alert alert-info bg-blue-50 text-blue-900 border-blue-200 p-6 font-medium">
+        No hay ofertas que coincidan con los filtros seleccionados.
+    </div>
 {% endif %}

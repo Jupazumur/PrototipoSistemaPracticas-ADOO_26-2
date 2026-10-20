@@ -1,131 +1,47 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Sistema de prácticas{% endblock %}</title>
+    
     <!-- HTMX CDN -->
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
-    <style>
-        :root {
-            color-scheme: light;
-            --bg: #f4f6f8;
-            --card: #ffffff;
-            --text: #1f2933;
-            --muted: #52606d;
-            --border: #d9e2ec;
-            --accent: #1d4ed8;
-            --accent-hover: #1e40af;
-            --ok: #047857;
-            --warn: #b45309;
-            --err: #b91c1c;
+    
+    <!-- DaisyUI y Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración de colores de Tailwind basados en la imagen -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        institucional: {
+                            blue: '#00479b',
+                            orange: '#f89d1c',
+                        }
+                    }
+                }
+            }
         }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
-        header, main { max-width: 1100px; margin: 0 auto; padding: 1.25rem; }
-        header {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            align-items: flex-start;
-            flex-wrap: wrap;
-        }
-        h1 { margin: 0 0 0.35rem; font-size: 1.6rem; }
-        p.lead { margin: 0; color: var(--muted); }
-        .panel, .oferta, .mensaje, .vacio {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem 1.15rem;
-            margin-top: 1rem;
-        }
-        label { display: block; font-size: 0.9rem; margin-bottom: 0.3rem; }
-        input[type="email"], input[type="password"], input[type="text"],
-        input[type="date"], select {
-            width: 100%;
-            max-width: 360px;
-            padding: 0.5rem 0.55rem;
-            margin-bottom: 0.85rem;
-        }
-        .filtros {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 0.75rem 1rem;
-            align-items: end;
-        }
-        .filtros .campo { min-width: 0; }
-        .filtros input, .filtros select { max-width: none; margin-bottom: 0; }
-        .acciones-filtro {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.85rem;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
-        th, td {
-            text-align: left;
-            padding: 0.45rem 0.4rem;
-            border-bottom: 1px solid var(--border);
-            vertical-align: top;
-        }
-        th { color: var(--muted); font-weight: 600; }
-        details.oferta summary {
-            cursor: pointer;
-            list-style: none;
-        }
-        details.oferta summary::-webkit-details-marker { display: none; }
-        .resumen-oferta {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: flex-start;
-        }
-        .contador {
-            white-space: nowrap;
-            color: var(--accent);
-            font-weight: bold;
-        }
-        button, .boton-secundario {
-            background: var(--accent);
-            color: #fff;
-            border: 0;
-            border-radius: 6px;
-            padding: 0.5rem 0.9rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        button:hover { background: var(--accent-hover); }
-        .boton-secundario {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .oferta h2 { margin: 0 0 0.4rem; font-size: 1.15rem; }
-        .meta { color: var(--muted); font-size: 0.92rem; margin: 0.15rem 0; }
-        .mensaje.success { border-left: 4px solid var(--ok); }
-        .mensaje.warning { border-left: 4px solid var(--warn); }
-        .mensaje.error { border-left: 4px solid var(--err); }
-        .estado {
-            display: inline-block;
-            margin-top: 0.75rem;
-            color: var(--ok);
-            font-weight: bold;
-        }
-        .login-box { max-width: 420px; }
-    </style>
+    </script>
+
+    <!-- Hoja de estilos externa -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
-<body>
-    {% block body %}{% endblock %}
+<body class="min-h-screen flex flex-col items-center">
+    <!-- Navbar superior con color institucional -->
+    <div class="w-full bg-institucional-blue text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-xl tracking-wide">Universidad de Sonora</div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-6xl mx-auto p-4 md:p-6 lg:p-8">
+        {% block body %}{% endblock %}
+    </div>
 </body>
 </html>
